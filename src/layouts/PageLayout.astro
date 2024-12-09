@@ -26,6 +26,7 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
       // Inline script to handle routing before any content loads
       (function() {
         const path = window.location.pathname;
+        
         // Skip for static assets and API routes
         if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) || 
             path.startsWith('/api/') ||
@@ -38,13 +39,22 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
         if (!langMatch) {
           const storedLang = localStorage.getItem('preferredLanguage');
           const browserLang = navigator.language;
-          const lang = storedLang || 
-            (browserLang.startsWith('zh') ? 'zh-CN' : 
-             browserLang.split('-')[0] === 'en' ? 'en' : 'en');
           
-          // Remove any existing language prefix and add the correct one
-          const cleanPath = path.replace(/^\/(?:en|zh-CN)/, '');
-          const newPath = `/${lang}${cleanPath}`;
+          // Determine language preference
+          let lang = storedLang;
+          if (!lang) {
+            if (browserLang.startsWith('zh')) {
+              lang = 'zh-CN';
+            } else if (browserLang.split('-')[0] === 'en') {
+              lang = 'en';
+            } else {
+              lang = 'en'; // Default fallback
+            }
+          }
+          
+          // Remove any existing language prefix
+          const cleanPath = path.replace(/^\/(?:en|zh-CN)/, '').replace(/^\/+/, '');
+          const newPath = `/${lang}${cleanPath ? `/${cleanPath}` : ''}`;
           window.location.replace(newPath.replace(/\/+/g, '/'));
         }
       })();
