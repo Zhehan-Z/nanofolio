@@ -21,8 +21,8 @@ export function detectPreferredLanguage(): string {
   try {
     // Check localStorage first
     const storedLang = localStorage.getItem('preferredLanguage');
-    if (storedLang && languages[storedLang]) {
-      return storedLang;
+    if (storedLang && languages[normalizeLanguage(storedLang)]) {
+      return normalizeLanguage(storedLang);
     }
 
     // Check browser language
@@ -33,12 +33,12 @@ export function detectPreferredLanguage(): string {
     }
 
     // Handle Chinese variants
-    if (browserLang.startsWith('zh')) {
+    if (browserLang.toLowerCase().startsWith('zh')) {
       return 'zh-CN';
     }
 
     // Handle English variants
-    if (browserLang.startsWith('en')) {
+    if (browserLang.toLowerCase().startsWith('en')) {
       return 'en';
     }
 
@@ -48,17 +48,21 @@ export function detectPreferredLanguage(): string {
   }
 }
 
-export function hasValidLanguagePrefix(path: string): boolean {
-  return /^\/(?:en|zh-CN)(?:\/|$)/.test(path);
+export function normalizeLanguageCode(lang: string): string {
+  if (lang.toLowerCase() === 'zh-cn') return 'zh-CN';
+  if (lang.toLowerCase() === 'en') return 'en';
+  return lang;
 }
 
-export function cleanPath(path: string): string {
-  // Remove any existing language prefix and clean up slashes
-  return path
-    .replace(/^\/(?:en|zh-CN)/, '') // Remove language prefix
-    .replace(/^\/+/, '')            // Remove leading slashes
-    .replace(/\/+$/, '')            // Remove trailing slashes
-    .replace(/\/+/g, '/');          // Replace multiple slashes with single slash
+export function hasValidLanguagePrefix(path: string): boolean {
+  const match = path.match(/^\/([^/]+)/);
+  if (!match) return false;
+  const prefix = match[1].toLowerCase();
+  return prefix === 'en' || prefix === 'zh-cn';
+}
+
+export function getPathWithoutLang(path: string): string {
+  return path.replace(/^\/(?:en|zh-cn|zh-CN)(?:\/|$)/i, '/');
 }
 
 export function getLanguagePrefixedPath(path: string, lang?: string): string {
@@ -66,15 +70,16 @@ export function getLanguagePrefixedPath(path: string, lang?: string): string {
   if (isPublicPath(path)) {
     return path;
   }
-  
-  // Clean the path first
-  const cleaned = cleanPath(path);
+
+  // Remove any existing language prefix
+  const pathWithoutLang = getPathWithoutLang(path);
   
   // Use provided lang or detect preferred language
-  const targetLang = lang || detectPreferredLanguage();
+  let targetLang = lang || detectPreferredLanguage();
+  targetLang = normalizeLanguageCode(targetLang);
   
-  // Construct the new path
-  return `/${targetLang}${cleaned ? `/${cleaned}` : ''}`;
+  // Construct the new path, ensuring no double slashes
+  return `/${targetLang}${pathWithoutLang}`.replace(/\/+/g, '/');
 }
 
 // Function to handle initial routing
@@ -86,9 +91,20 @@ export function handleInitialRouting(): void {
     return;
   }
 
-  // Check if path starts with a valid language prefix
-  if (!hasValidLanguagePrefix(path)) {
-    const newPath = getLanguagePrefixedPath(path);
+  // If path has a valid language prefix but wrong case, normalize it
+  if (hasValidLanguagePrefix(path)) {
+    const [, lang, ...rest] = path.split('/');
+    const normalizedLang = normalizeLanguageCode(lang);
+    if (normalizedLang !== lang) {
+      const newPath = `/${normalizedLang}/${rest.join('/')}`.replace(/\/+/g, '/');
+      window.location.replace(newPath);
+    }
+    return;
+  }
+
+  // If path doesn't have a valid language prefix, add one
+  const newPath = getLanguagePrefixedPath(path);
+  if (newPath !== path) {
     window.location.replace(newPath);
   }
 }

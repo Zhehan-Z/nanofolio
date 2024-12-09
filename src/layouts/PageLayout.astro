@@ -22,10 +22,42 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
 <html lang={lang}>
   <head>
     <Head title={`${localizedTitle} • ${SITE.NAME}`} description={description} />
-    <script>
-      import { handleInitialRouting } from '../lib/routing';
-      // Handle routing before any content loads
-      handleInitialRouting();
+    <script is:inline>
+      // Inline script to handle routing before any content loads
+      (function() {
+        const path = window.location.pathname;
+        
+        // Skip for static assets and API routes
+        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) || 
+            path.startsWith('/api/') ||
+            path.startsWith('/fonts/')) {
+          return;
+        }
+
+        // Check if path starts with a valid language prefix (case insensitive)
+        const hasValidPrefix = /^\/(?:en|zh-cn)(?:\/|$)/i.test(path);
+        if (!hasValidPrefix) {
+          const storedLang = localStorage.getItem('preferredLanguage');
+          const browserLang = navigator.language;
+          const lang = storedLang || 
+            (browserLang.toLowerCase().startsWith('zh') ? 'zh-CN' : 
+             browserLang.toLowerCase().startsWith('en') ? 'en' : 'en');
+          
+          // Remove any existing language prefix and add the correct one
+          const pathWithoutLang = path.replace(/^\/(?:en|zh-cn|zh-CN)(?:\/|$)/i, '/');
+          const newPath = `/${lang}${pathWithoutLang}`;
+          window.location.replace(newPath.replace(/\/+/g, '/'));
+        } else {
+          // Normalize the case of the language prefix if needed
+          const [, prefix, ...rest] = path.split('/');
+          const normalizedPrefix = prefix.toLowerCase() === 'zh-cn' ? 'zh-CN' : 
+                                 prefix.toLowerCase() === 'en' ? 'en' : prefix;
+          if (normalizedPrefix !== prefix) {
+            const newPath = `/${normalizedPrefix}/${rest.join('/')}`;
+            window.location.replace(newPath.replace(/\/+/g, '/'));
+          }
+        }
+      })();
     </script>
   </head>
   <body>
