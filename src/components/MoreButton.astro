@@ -1,0 +1,60 @@
+---
+import BaseCard from "./BaseCard.astro";
+
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  scrollToIndex?: number;
+}
+
+const { href, title, description, scrollToIndex } = Astro.props;
+---
+
+<BaseCard {href}>
+  <div 
+    class="relative py-3 px-4 pr-10 group"
+    data-more-button
+    data-scroll-to-index={scrollToIndex}
+  >
+    <div class="flex flex-col flex-1 truncate">
+      <div class="font-semibold text-black dark:text-white truncate">
+        {title}
+      </div>
+      <div class="text-sm truncate">
+        {description}
+      </div>
+    </div>
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24"
+      class="absolute top-1/2 right-2 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current">
+      <line x1="5" y1="12" x2="19" y2="12" class="translate-x-3 group-hover:translate-x-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)]" />
+      <polyline points="12 5 19 12 12 19" class="-translate-x-1 group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)]" />
+    </svg>
+  </div>
+</BaseCard>
+
+<script>
+  function initMoreButton() {
+    const buttons = document.querySelectorAll('[data-more-button]');
+    
+    buttons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = (button.closest('a') as HTMLAnchorElement)?.href;
+        const scrollToIndex = button.getAttribute('data-scroll-to-index');
+        
+        if (href) {
+          if (scrollToIndex) {
+            sessionStorage.setItem('scrollToEntry', scrollToIndex);
+          }
+          window.location.href = href;
+        }
+      });
+    });
+  }
+
+  // Initialize on page load and after client-side navigation
+  document.addEventListener('astro:page-load', initMoreButton);
+</script>

@@ -1,0 +1,32 @@
+export const home = {
+  en: {
+    'home.greeting': "Hi, I'm Zhehan Zhang",
+    'home.latest-posts': 'Latest Posts',
+    'home.academic-projects': 'New Academic Experience',
+    'home.recent-projects': 'Recent Projects',
+    'home.connect': "Let's Connect",
+    'home.connect-text': 'If you want to get in touch about opportunities or just to say hi, reach out on social media or send me an email.',
+    'home.intro.1': 'I’m a high school sophomore at NFLS (Nanjing Foreign Language School), passionate about life and curious about the world.',
+    'home.intro.2': 'I excel in social and natural sciences, languages, creative writing, MUN, cinematography, and technology, with strong skills and hands-on experience driving my growth.',
+    'home.intro.3': "With a heart full of hope, I believe in the beauty that lies ahead — the beauty of people, things, and moments yet to unfold. My goal is to pay it forward: to contribute and shine in every way I can, facing our shared future with sincerity and dedication.",
+    'home.email.primary': 'Primary',
+    'home.email.personal': 'Personal',
+    'home.email.academic': 'Academic',
+    'home.email.work': 'Work',
+  },
+  'zh-CN': {
+    'home.greeting': '你好，我是张哲涵',
+    'home.latest-posts': '最新文章',
+    'home.academic-projects': '近期学术',
+    'home.recent-projects': '项目上新',
+    'home.connect': '联系我',
+    'home.connect-text': '如果您想就机会或其他事宜与我联系，可以通过社交媒体或发送电子邮件。',
+    'home.intro.1': '我来自南京外国语学校，对生活充满热爱，对世界充满好奇。我积极探索，在社会与自然科学、语言、文学创作、模拟联合国、媒体影像制作和信息技术等领域不断取得进步。',
+    'home.intro.2': '我扎根基础，结合丰富实践经验，以热爱和专注取得了许多令人欣喜的成绩。我相信持续学习和突破边界的重要性，这让我在学术和个人成长方面都有显著提升。',
+    'home.intro.3': '我心怀希望，相信美好的事物就在前方。希望尽己所能，有一分力，发一分光，以赤诚之心面向我们共同的未来。',
+    'home.email.primary': '主要',
+    'home.email.personal': '个人',
+    'home.email.academic': '学术',
+    'home.email.work': '工作',
+  }
+} as const;

@@ -1,0 +1,43 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class={className}>
+  <picture class="block w-16 h-12 relative">
+    <img 
+      src="/logo-light.svg"
+      alt="Logo"
+      class="absolute inset-0 size-full opacity-50 group-hover:opacity-100 transition-all duration-300 block dark:hidden"
+      fetchpriority="high"
+    />
+    <img 
+      src="/logo-dark.svg"
+      alt="Logo"
+      class="absolute inset-0 size-full opacity-75 group-hover:opacity-100 transition-all duration-300 hidden dark:block"
+      fetchpriority="high"
+    />
+  </picture>
+</div>
+
+<script>
+  // Preload both logo variants
+  function preloadLogos() {
+    const logos = ['/logo-light.svg', '/logo-dark.svg'];
+    logos.forEach(src => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      link.type = 'image/svg+xml';
+      document.head.appendChild(link);
+    });
+  }
+
+  // Run on initial load and after view transitions
+  document.addEventListener('astro:page-load', preloadLogos);
+  window.addEventListener('load', preloadLogos);
+</script>

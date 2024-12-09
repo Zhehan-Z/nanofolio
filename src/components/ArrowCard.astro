@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+import BaseCard from "./BaseCard.astro";
+import LanguageLabel from "./LanguageLabel.astro";
+import { getLangFromUrl } from '../i18n/config';
+
+type Props = {
+  entry?: CollectionEntry<"blog"> | CollectionEntry<"projects">;
+  lang?: string;
+  title?: string;
+  description?: string;
+  scrollToIndex?: number;
+  href?: string;
+}
+
+const { entry, lang = 'en', title, description, scrollToIndex, href } = Astro.props;
+const currentLang = getLangFromUrl(Astro.url);
+
+// Handle both direct entry and custom title/description
+const cardTitle = title || entry?.data.title;
+const cardDescription = description || entry?.data.description;
+
+// Determine href and show conditions
+const showDate = entry?.collection === "blog";
+const cardHref = entry ? `/${lang}/${entry.collection}/${entry.slug.split('/').pop()}` : href;
+const showLanguageLabel = entry?.data.lang !== currentLang;
+
+// Data attributes for scroll functionality
+const dataAttrs = scrollToIndex !== undefined ? {
+  "data-scroll-to-index": scrollToIndex
+} : {};
+---
+
+<BaseCard href={cardHref}>
+  <div 
+    class="relative py-3 px-4 pr-10 group"
+    {...dataAttrs}
+  >
+    <div class="flex flex-col flex-1 truncate">
+      <div class="flex items-center gap-2">
+        <div class="font-semibold text-black dark:text-white truncate">
+          {cardTitle}
+        </div>
+        {showLanguageLabel && entry && (
+          <LanguageLabel contentLang={entry.data.lang} />
+        )}
+      </div>
+      <div class="text-sm truncate">
+        {cardDescription}
+      </div>
+      {showDate && entry && (
+        <div class="text-xs mt-1 opacity-75">
+          <FormattedDate date={entry.data.date} />
+        </div>
+      )}
+    </div>
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24"
+      class="absolute top-1/2 right-2 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current">
+      <line x1="5" y1="12" x2="19" y2="12" class="translate-x-3 group-hover:translate-x-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)]" />
+      <polyline points="12 5 19 12 12 19" class="-translate-x-1 group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)]" />
+    </svg>
+  </div>
+</BaseCard>
+
+<script>
+  function initScrollHandling() {
+    document.querySelectorAll('[data-scroll-to-index]').forEach(element => {
+      element.addEventListener('click', (e) => {
+        const scrollToIndex = element.getAttribute('data-scroll-to-index');
+        if (scrollToIndex) {
+          sessionStorage.setItem('scrollToEntry', scrollToIndex);
+        }
+      });
+    });
+  }
+
+  // Initialize on page load and after client-side navigation
+  document.addEventListener('astro:page-load', initScrollHandling);
+</script>

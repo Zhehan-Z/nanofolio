@@ -1,0 +1,85 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import ArrowCard from "@components/ArrowCard.astro";
+import BackToPrev from "@components/BackToPrev.astro";
+import { BLOG } from "@consts";
+import { languages, getLangFromUrl, useTranslations } from '../../../i18n/config';
+
+export async function getStaticPaths() {
+  return Object.keys(languages).map(lang => ({ params: { lang } }));
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Get all posts in current language, fallback to any language if needed
+const allPosts = await getCollection("blog");
+const slugs = new Set(allPosts.map(post => post.slug.split('/').pop()));
+
+const data = Array.from(slugs).map(slug => {
+  // Try to find post in current language
+  const langPost = allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    p.data.lang === lang &&
+    !p.data.draft
+  );
+  
+  // Fallback to any language version
+  return langPost || allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    !p.data.draft
+  );
+}).filter(Boolean).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+type Acc = {
+  [year: string]: CollectionEntry<"blog">[];
+}
+
+const posts = data.reduce((acc: Acc, post) => {
+    const year = post.data.date.getFullYear().toString();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(post);
+    return acc;
+  }, {});
+
+const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a)); 
+---
+
+<PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
+  <Container>
+    <div class="animate mb-10">
+      <BackToPrev href={`/${lang}`}>
+        {`${t('card.back')}${t('nav.home').toLowerCase()}`}
+      </BackToPrev>
+    </div>
+    <div class="space-y-6">
+      <div class="animate font-semibold text-black dark:text-white">
+        {t('blog.title')}
+      </div>
+      <div class="space-y-4">
+        {years.map(year => (
+          <section class="animate space-y-4">
+            <div class="font-semibold text-black dark:text-white">
+              {year}
+            </div>
+            <div>
+              <ul class="flex flex-col gap-4">
+                {
+                  posts[year].map((post) => (
+                    <li>
+                      <ArrowCard entry={post} lang={lang}/>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  </Container>
+</PageLayout>

@@ -1,0 +1,119 @@
+---
+import { useTranslations } from '../i18n/config';
+import { getLangFromUrl } from '../i18n/config';
+import { EASINGS, DURATIONS, DELAYS } from '../lib/animations';
+
+interface Props {
+  defaultOpen?: boolean;
+}
+
+const { defaultOpen = false } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="expandable-card" tabindex="0" role="button">
+  <div class="expandable-content" data-expanded={defaultOpen}>
+    <div class="content-wrapper">
+      <slot />
+    </div>
+  </div>
+  <div 
+    class="expand-button w-full py-1.5 mt-1.5 text-xs border-t border-black/10 dark:border-white/10 opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+    aria-hidden="true">
+    <div class="flex items-center justify-center gap-1">
+      <span class="expand-text" data-show-more={t('card.show-more')} data-show-less={t('card.show-less')}>
+        {t('card.show-more')}
+      </span>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24"
+        class="size-3.5 stroke-2 fill-none stroke-current expand-icon transition-transform duration-700">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style define:vars={{
+  contentTransition: `max-height ${DURATIONS.content}ms ${EASINGS.easeInOutCubic}`,
+  wrapperTransition: `opacity ${DURATIONS.normal}ms ${EASINGS.easeInOutCubic} ${DELAYS.content}ms,
+                      transform ${DURATIONS.normal}ms ${EASINGS.easeOutBack} ${DELAYS.content}ms`,
+}}>
+  .expandable-content {
+    position: relative;
+    max-height: 12rem;
+    overflow: hidden;
+    transition: var(--contentTransition);
+  }
+
+  .content-wrapper {
+    opacity: 1;
+    transform: translateY(0);
+    transition: var(--wrapperTransition);
+  }
+
+  .expandable-content[data-expanded="true"] {
+    max-height: 100rem;
+  }
+
+  .expandable-content[data-expanded="true"] .content-wrapper {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .expandable-content[data-expanded="false"] .content-wrapper {
+    opacity: 0.75;
+    transform: translateY(0);
+  }
+
+  .expandable-content[data-expanded="true"] + .expand-button .expand-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .expandable-content,
+    .content-wrapper,
+    .expand-icon {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  function initializeExpandableCards() {
+    document.querySelectorAll('.expandable-card').forEach(card => {
+      const content = card.querySelector('.expandable-content');
+      const text = card.querySelector('.expand-text');
+      const showMore = text?.getAttribute('data-show-more') || 'Show more';
+      const showLess = text?.getAttribute('data-show-less') || 'Show less';
+
+      function toggleExpand(e: Event) {
+        // Don't expand if clicking a link
+        if ((e.target as HTMLElement).closest('a')) return;
+        
+        if (!content || !text) return;
+        const isExpanded = content.getAttribute('data-expanded') === 'true';
+        content.setAttribute('data-expanded', (!isExpanded).toString());
+        text.textContent = isExpanded ? showMore : showLess;
+      }
+
+      // Handle click events
+      card.addEventListener('click', toggleExpand);
+
+      // Handle keyboard events for accessibility
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleExpand(e);
+        }
+      });
+    });
+  }
+
+  // Initialize on page load
+  initializeExpandableCards();
+
+  // Re-initialize on client-side navigation
+  document.addEventListener('astro:after-swap', initializeExpandableCards);
+</script>

@@ -1,0 +1,223 @@
+---
+import { getCollection } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import ArrowCard from "@components/ArrowCard.astro";
+import AcademicCard from "@components/AcademicCard.astro";
+import Link from "@components/Link.astro";
+import PhotoGrid from "@components/PhotoGrid.astro";
+import { SITE, SOCIALS } from "@consts";
+import { getLangFromUrl, useTranslations, languages } from '../../i18n/config';
+
+export async function getStaticPaths() {
+  return Object.keys(languages).map(lang => ({ params: { lang } }));
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const photos = [
+  { src: "/photos/home/photo-1.jpeg", alt: "Photo 1" },
+  { src: "/photos/home/photo-2.jpeg", alt: "Photo 2" },
+  { src: "/photos/home/photo-3.jpeg", alt: "Photo 3" },
+  { src: "/photos/home/photo-4.jpeg", alt: "Photo 4" },
+  { src: "/photos/home/photo-5.jpeg", alt: "Photo 5" },
+  { src: "/photos/home/photo-6.jpeg", alt: "Photo 6" },
+  { src: "/photos/home/photo-7.jpeg", alt: "Photo 7" },
+  { src: "/photos/home/photo-8.jpeg", alt: "Photo 8" },
+  { src: "/photos/home/photo-9.jpeg", alt: "Photo 9" },
+];
+
+// Get all posts, handle language versions
+const allPosts = await getCollection("blog");
+const slugs = new Set(allPosts.map(post => post.slug.split('/').pop()));
+
+const blog = Array.from(slugs).map(slug => {
+  // Try to find post in current language
+  const langPost = allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    p.data.lang === lang &&
+    !p.data.draft
+  );
+  
+  // Fallback to any language version
+  return langPost || allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    !p.data.draft
+  );
+}).filter(Boolean)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+
+const allAcademic = (await getCollection("academic", ({ id }) => {
+  const [folder] = id.split('/');
+  return folder === lang;
+}))
+  .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf())
+  .slice(0,SITE.NUM_ACADEMIC_ON_HOMEPAGE);
+
+const academic = await Promise.all(
+  allAcademic.map(async (item) => {
+    const { Content } = await item.render();
+    return { ...item, Content };
+  })
+);
+
+const projects = (await getCollection("projects"))
+  .filter(project => !project.data.draft && project.data.lang === lang)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0,SITE.NUM_PROJECTS_ON_HOMEPAGE);
+---
+
+<PageLayout title="home" description={t('meta.home.description')}>
+  <Container>
+    <div class="space-y-8 md:space-y-12">
+      <section>
+        <div class="relative">
+          <div class="absolute -top-0 -right-7 md:-right-8 hidden md:block">
+            <div class="animate">
+              <PhotoGrid images={photos} />
+            </div>
+          </div>
+          <article class="animate space-y-4 md:max-w-[calc(100%-14rem)]">
+            <h4 class="text-xl md:text-xl font-semibold text-black dark:text-white mb-4">
+              {t('home.greeting')} 👋🏻 
+            </h4>
+            <div class="space-y-4 mb-12 md:mb-0">
+              <p class="text-base md:text-base leading-relaxed">
+                {t('home.intro.1')}
+              </p>
+              <p class="text-base md:text-base leading-relaxed">
+                {t('home.intro.2')}
+              </p>
+              <p class="text-base md:text-base leading-relaxed">
+                {t('home.intro.3')}
+              </p>
+            </div>
+          </article>
+          <div class="md:hidden mb-2">
+            <div class="animate">
+              <PhotoGrid images={photos} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.latest-posts')}
+          </h5>
+          <Link href={`/${lang}/blog`}>
+            {t('see.all')} {t('nav.blog').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col gap-4">
+          {blog.map(post => (
+            <li>
+              <ArrowCard entry={post} lang={lang} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.academic-projects')}
+          </h5>
+          <Link href={`/${lang}/academic`}>
+            {t('see.all')} {t('nav.academic').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col space-y-4">
+          {academic.map(entry => (
+            <li>
+              <AcademicCard entry={entry} lang={lang} />
+            </li>
+          ))}
+          <li>
+            <ArrowCard 
+              href={`/${lang}/academic`}
+              title={t('academic.more.title')}
+              description={t('academic.more.description')}
+              scrollToIndex={2}
+            />
+          </li>
+        </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.recent-projects')}
+          </h5>
+          <Link href={`/${lang}/projects`}>
+            {t('see.all')} {t('nav.projects').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col gap-4">
+          {projects.map(project => (
+            <li>
+              <ArrowCard entry={project} lang={lang} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="animate space-y-4">
+        <h5 class="font-semibold text-black dark:text-white">
+          {t('home.connect')}
+        </h5>
+        <article>
+          <p>
+            {t('home.connect-text')}
+          </p>
+        </article>
+        <div class="flex flex-col gap-6">
+          <div class="flex flex-wrap gap-2">
+            {SOCIALS.map((SOCIAL, index) => (
+              <>
+                <Link 
+                  href={SOCIAL.HREF} 
+                  external 
+                  aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}
+                >
+                  {SOCIAL.NAME}
+                </Link>
+                {index < SOCIALS.length - 1 && (
+                  <span class="text-black/25 dark:text-white/25">•</span>
+                )}
+              </>
+            ))}
+          </div>
+          <div class="space-y-2">
+            {SITE.EMAILS.map((email) => (
+              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <Link 
+                  href={`mailto:${email.address}`} 
+                  aria-label={`Email ${SITE.NAME}${email.label ? ` (${email.label})` : ''}`}
+                  class="break-all"
+                >
+                  {email.address}
+                </Link>
+                <div class="flex gap-1.5 flex-wrap">
+                  {email.label && (
+                    <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
+                      {t(`home.email.${email.label.toLowerCase()}`)}
+                    </span>
+                  )}
+                  {email.primary && (
+                    <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
+                      {t('home.email.primary')}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  </Container>
+</PageLayout>

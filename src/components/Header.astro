@@ -1,0 +1,197 @@
+---
+import Container from "@components/Container.astro";
+import Link from "@components/Link.astro";
+import LanguageSelector from "./LanguageSelector.astro";
+import Logo from "./Logo.astro";
+import { SITE } from "@consts";
+import { getLangFromUrl, useTranslations, useRouteTranslations } from '../i18n/config';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRouteTranslations(lang);
+---
+
+<header>
+  <Container>
+    <div class="flex flex-wrap gap-y-1 justify-between items-center">
+      <div class="flex items-center justify-between w-full md:w-auto">
+        <Link href={`/${lang}`} underline={false} class="brand-link">
+          <div class="group flex items-center gap-3">
+            <Logo />
+            <div class="font-semibold text-black/50 dark:text-white/75 group-hover:text-black group-hover:dark:text-white transition-colors duration-300">
+              {SITE.NAME}
+            </div>
+          </div>
+        </Link>
+        <div class="flex items-center gap-3 md:hidden">
+          <LanguageSelector currentLang={lang} />
+          <button
+            id="mobile-menu-button"
+            class="flex items-center justify-center p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300"
+            aria-label="Toggle menu"
+          >
+            <div class="relative w-4 h-4">
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-4">
+        <div class="flex gap-1">
+          <Link href={`/${lang}/${r('blog')}`}>
+            {t('nav.blog')}
+          </Link>
+          <span>
+            {`/`}
+          </span>
+          <Link href={`/${lang}/${r('academic')}`}>
+            {t('nav.academic')}
+          </Link>
+          <span>
+            {`/`}
+          </span>
+          <Link href={`/${lang}/${r('projects')}`}>
+            {t('nav.projects')}
+          </Link>
+        </div>
+        <LanguageSelector currentLang={lang} />
+      </nav>
+      <div 
+        id="mobile-menu" 
+        class="hidden w-full md:hidden"
+      >
+        <nav class="mobile-menu-content flex flex-col items-center gap-4 py-4">
+          <Link href={`/${lang}/${r('blog')}`}>
+            {t('nav.blog')}
+          </Link>
+          <Link href={`/${lang}/${r('academic')}`}>
+            {t('nav.academic')}
+          </Link>
+          <Link href={`/${lang}/${r('projects')}`}>
+            {t('nav.projects')}
+          </Link>
+        </nav>
+      </div>
+    </div>
+  </Container>
+</header>
+
+<style>
+  .hamburger-line {
+    @apply absolute left-0 h-0.5 w-full bg-current rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)];
+  }
+
+  .hamburger-line:nth-child(1) {
+    @apply top-0 origin-center;
+  }
+
+  .hamburger-line:nth-child(2) {
+    @apply top-1.5 origin-center;
+  }
+
+  .hamburger-line:nth-child(3) {
+    @apply top-3 origin-center;
+  }
+
+  .menu-open .hamburger-line:nth-child(1) {
+    @apply top-1.5 rotate-45;
+  }
+
+  .menu-open .hamburger-line:nth-child(2) {
+    @apply scale-0;
+  }
+
+  .menu-open .hamburger-line:nth-child(3) {
+    @apply top-1.5 -rotate-45;
+  }
+
+  #mobile-menu {
+    @apply transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)] overflow-hidden;
+    height: 0;
+  }
+
+  #mobile-menu.menu-open {
+    height: var(--menu-height);
+  }
+
+  .mobile-menu-content {
+    @apply opacity-0 -translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1.0)];
+  }
+
+  #mobile-menu.menu-open .mobile-menu-content {
+    @apply opacity-100 translate-y-0;
+  }
+</style>
+
+<script>
+  let initialized = false;
+
+  function initMobileMenu() {
+    if (initialized) return;
+    initialized = true;
+
+    const button = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+    const menuContent = menu?.querySelector('.mobile-menu-content');
+    const header = document.querySelector('header');
+
+    let isOpen = false;
+
+    function setMenuHeight() {
+      if (!menuContent) return;
+      const height = menuContent.getBoundingClientRect().height;
+      menu?.style.setProperty('--menu-height', `${height}px`);
+    }
+
+    function toggleMenu() {
+      isOpen = !isOpen;
+
+      if (isOpen) {
+        menu?.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          setMenuHeight();
+          button?.classList.add('menu-open');
+          menu?.classList.add('menu-open');
+          header?.classList.add('expanded');
+        });
+      } else {
+        button?.classList.remove('menu-open');
+        menu?.classList.remove('menu-open');
+        header?.classList.remove('expanded');
+
+        setTimeout(() => {
+          if (!isOpen) {
+            menu?.classList.add('hidden');
+          }
+        }, 500);
+      }
+    }
+
+    function cleanup() {
+      button?.removeEventListener('click', toggleMenu);
+      window.removeEventListener('resize', setMenuHeight);
+      initialized = false;
+    }
+
+    button?.addEventListener('click', toggleMenu);
+    window.addEventListener('resize', setMenuHeight);
+
+    menu?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (isOpen) toggleMenu();
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      if (isOpen && window.innerWidth >= 768) {
+        toggleMenu();
+      }
+    });
+
+    document.addEventListener('astro:before-swap', cleanup);
+  }
+
+  document.addEventListener('astro:page-load', initMobileMenu);
+</script>

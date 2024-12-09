@@ -1,0 +1,59 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  images: {
+    src: string;
+    alt: string;
+  }[];
+}
+
+const { images } = Astro.props;
+---
+
+<div class="relative w-44 h-44 md:w-56 md:h-56 shrink-0">
+  <div class="carousel absolute inset-0">
+    {images.map((image, index) => (
+      <div 
+        class="carousel-item absolute inset-0 opacity-0 transition-opacity duration-1000"
+        data-index={index}
+      >
+        <div class="relative">
+          <img
+            src={image.src}
+            alt={image.alt}
+            class="size-44 md:size-56 rounded-full object-cover border border-black/10 dark:border-white/10"
+            loading={index === 0 ? "eager" : "lazy"}
+          />
+          <div class="absolute inset-0 rounded-full bg-stone-100/75 dark:bg-stone-900/75"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  function initCarousel() {
+    const carousels = document.querySelectorAll('.carousel');
+    
+    carousels.forEach(carousel => {
+      const items = carousel.querySelectorAll('.carousel-item');
+      let currentIndex = 0;
+      
+      // Show first item initially
+      items[0].classList.add('opacity-100');
+      
+      function showNext() {
+        items[currentIndex].classList.remove('opacity-100');
+        currentIndex = (currentIndex + 1) % items.length;
+        items[currentIndex].classList.add('opacity-100');
+      }
+      
+      // Change image every 5 seconds
+      setInterval(showNext, 5000);
+    });
+  }
+
+  // Initialize on page load and after view transitions
+  document.addEventListener('astro:page-load', initCarousel);
+</script>

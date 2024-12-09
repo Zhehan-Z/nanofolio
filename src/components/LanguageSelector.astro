@@ -1,0 +1,60 @@
+---
+import { languages } from '../i18n/config';
+import { getRelativeUrl } from '../i18n/config';
+import { getLangFromUrl } from '../i18n/config';
+import BaseCard from './BaseCard.astro';
+
+const { currentLang } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<div class="relative group">
+  <BaseCard>
+    <button
+      class="flex items-center gap-1 px-2 py-1"
+      aria-label="Select language"
+    >
+      <span class="text-sm">{languages[currentLang]}</span>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24"
+        class="size-4 stroke-2 fill-none stroke-current transition-transform duration-300 group-hover:rotate-180">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  </BaseCard>
+
+  <div class="absolute right-0 mt-1 w-32 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+    <div class="rounded-lg border border-black/15 dark:border-white/20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm">
+      <div class="py-1">
+        {Object.entries(languages).map(([lang, label]) => (
+          <a
+            href={getRelativeUrl(lang, currentPath)}
+            class={`block px-4 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300 ${currentLang === lang ? 'font-semibold text-black dark:text-white' : ''}`}
+            data-lang={lang}
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { saveScrollPosition } from '../lib/scroll';
+
+  function initLanguageSelector() {
+    document.querySelectorAll('[data-lang]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const lang = (e.currentTarget as HTMLElement).dataset.lang;
+        if (lang) {
+          localStorage.setItem('preferredLanguage', lang);
+          saveScrollPosition();
+        }
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initLanguageSelector);
+</script>

@@ -1,0 +1,180 @@
+---
+import type { Photo } from '../lib/types';
+
+interface Props {
+  images: Photo[];
+}
+
+const { images } = Astro.props;
+---
+
+<div class="relative md:w-[400px] md:h-[300px] shrink-0">
+  <!-- Mobile: Three rotating circles -->
+  <div class="md:hidden flex flex-wrap justify-center py-16 photo-carousel">
+    <!-- Top row with two overlapping circles -->
+    <div class="relative flex justify-center w-full -mb-20">
+      <div
+        class="relative parallax"
+        data-photo-index="0"
+        data-speed-mobile="1.2"
+        data-speed-desktop="2"
+        data-initial-x="-8"
+        data-initial-y="-40"
+      >
+        <img
+          src={images[0].src}
+          alt={images[0].alt}
+          class="w-[45vw] h-[45vw] max-w-44 max-h-44 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+          loading="eager"
+        />
+      </div>
+      <div
+        class="relative parallax"
+        data-photo-index="1"
+        data-speed-mobile="1"
+        data-speed-desktop="1.5"
+        data-initial-x="10"
+        data-initial-y="-20"
+      >
+        <img
+          src={images[1].src}
+          alt={images[1].alt}
+          class="w-[45vw] h-[45vw] max-w-44 max-h-44 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+          loading="eager"
+        />
+      </div>
+    </div>
+    <!-- Bottom circle centered -->
+    <div
+      class="relative z-10 parallax"
+      data-photo-index="2"
+      data-speed-mobile="0.8"
+      data-speed-desktop="1"
+      data-initial-x="0"
+      data-initial-y="-20"
+    >
+      <img
+        src={images[2].src}
+        alt={images[2].alt}
+        class="w-[50vw] h-[50vw] max-w-52 max-h-52 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+        loading="eager"
+      />
+    </div>
+  </div>
+
+  <!-- Desktop: Three rotating circles -->
+  <div class="hidden md:block w-full h-full transform translate-x-4 photo-carousel">
+    <!-- Large circle -->
+    <div
+      class="absolute -right-6 top-0 parallax"
+      data-photo-index="0"
+      data-speed-mobile="1.2"
+      data-speed-desktop="2"
+      data-initial-x="0"
+      data-initial-y="3"
+    >
+      <img
+        src={images[0].src}
+        alt={images[0].alt}
+        class="size-52 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+        loading="eager"
+      />
+    </div>
+    <!-- Medium circle -->
+    <div
+      class="absolute right-24 top-28 parallax"
+      data-photo-index="1"
+      data-speed-mobile="1"
+      data-speed-desktop="1.5"
+      data-initial-x="0"
+      data-initial-y="8"
+    >
+      <img
+        src={images[1].src}
+        alt={images[1].alt}
+        class="size-40 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+        loading="eager"
+      />
+    </div>
+    <!-- Small circle -->
+    <div
+      class="absolute right-12 top-60 parallax"
+      data-photo-index="2"
+      data-speed-mobile="0.9"
+      data-speed-desktop="1"
+      data-initial-x="0"
+      data-initial-y="7"
+    >
+      <img
+        src={images[2].src}
+        alt={images[2].alt}
+        class="size-32 rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform, opacity]"
+        loading="eager"
+      />
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initializeCarousel } from '../lib/carousel';
+
+  function initPhotoCarousels() {
+    document.querySelectorAll('.photo-carousel').forEach(carousel => {
+      const totalPhotos = 9; // Total number of photos
+      const interval = initializeCarousel(carousel, totalPhotos, {
+        interval: 4000,
+        transitionDuration: 600
+      });
+
+      // Cleanup on page navigation
+      document.addEventListener('astro:before-swap', () => {
+        clearInterval(interval);
+      });
+    });
+  }
+
+  function initParallaxEffect() {
+    const parallaxElements = document.querySelectorAll('.parallax');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    const observerOptions = {
+      root: null, // viewport
+      threshold: 0.1 // Trigger when 10% of the element is visible
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          const speed = isMobile
+            ? parseFloat(element.dataset.speedMobile) || 1
+            : parseFloat(element.dataset.speedDesktop) || 1;
+          const initialX = parseFloat(element.dataset.initialX) || 0;
+          const initialY = parseFloat(element.dataset.initialY) || 0;
+
+          // Apply initial translateX and translateY value
+          element.style.transform = `translate(${initialX}px, ${initialY}px)`;
+
+          const scrollListener = () => {
+            const scrollTop = window.scrollY;
+            const translateX = isMobile ? initialX : 0; // Keep translateX for mobile only
+            const translateY = initialY + scrollTop * speed * 0.1;
+            element.style.transform = `translate(${translateX}px, ${translateY}px)`;
+          };
+          window.addEventListener('scroll', scrollListener);
+
+          // Cleanup when element is no longer visible
+          observer.unobserve(element);
+        }
+      });
+    }, observerOptions);
+
+    parallaxElements.forEach((element) => observer.observe(element));
+  }
+
+  // Initialize on page load and after client-side navigation
+  document.addEventListener('astro:page-load', () => {
+    initPhotoCarousels();
+    initParallaxEffect();
+  });
+</script>

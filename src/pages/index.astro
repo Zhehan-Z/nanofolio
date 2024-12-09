@@ -1,0 +1,158 @@
+---
+import { getCollection } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import ArrowCard from "@components/ArrowCard.astro";
+import AcademicCard from "@components/AcademicCard.astro";
+import MoreButton from "@components/MoreButton.astro";
+import Link from "@components/Link.astro";
+import { SITE, HOME, SOCIALS } from "@consts";
+import { defaultLang, useTranslations } from '../i18n/config';
+
+const lang = defaultLang;
+const t = useTranslations(lang);
+
+// Get all posts, handle language versions
+const allPosts = await getCollection("blog");
+const slugs = new Set(allPosts.map(post => post.slug.split('/').pop()));
+
+const blog = Array.from(slugs).map(slug => {
+  // Try to find post in current language
+  const langPost = allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    p.data.lang === lang &&
+    !p.data.draft
+  );
+  
+  // Fallback to any language version
+  return langPost || allPosts.find(p => 
+    p.slug.split('/').pop() === slug && 
+    !p.data.draft
+  );
+}).filter(Boolean)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+
+const projects = (await getCollection("projects"))
+  .filter(project => !project.data.draft && project.data.lang === lang)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0,SITE.NUM_PROJECTS_ON_HOMEPAGE);
+
+const allAcademic = (await getCollection("academic"))
+  .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf())
+  .slice(0,SITE.NUM_ACADEMIC_ON_HOMEPAGE);
+
+const academic = await Promise.all(
+  allAcademic.map(async (item) => {
+    const { Content } = await item.render();
+    return { ...item, Content };
+  })
+);
+---
+
+<PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+  <Container>
+    <h4 class="animate font-semibold text-black dark:text-white">
+      {t('home.greeting')} 👋🏻 
+    </h4>
+    <div class="space-y-16">
+      <section>
+        <article class="space-y-4">
+          <p class="animate">
+            {t('home.intro.1')}
+          </p>
+          <p class="animate">
+            {t('home.intro.2')}
+          </p>
+        </article>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.latest-posts')}
+          </h5>
+          <Link href={`/${lang}/blog`}>
+            {t('see.all')} {t('nav.blog').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col gap-4">
+          {blog.map(post => (
+            <li>
+              <ArrowCard entry={post} lang={lang} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.academic-projects')}
+          </h5>
+          <Link href={`/${lang}/academic`}>
+            {t('see.all')} {t('nav.academic').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col space-y-4">
+          {academic.map(entry => (
+            <li>
+              <AcademicCard entry={entry} lang={lang} />
+            </li>
+          ))}
+          <li>
+            <MoreButton 
+              href={`/${lang}/academic`}
+              title="More Academic Experience"
+              description="More on my interests and exploration"
+            />
+          </li>
+        </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            {t('home.recent-projects')}
+          </h5>
+          <Link href={`/${lang}/projects`}>
+            {t('see.all')} {t('nav.projects').toLowerCase()}
+          </Link>
+        </div>
+        <ul class="flex flex-col gap-4">
+          {projects.map(project => (
+            <li>
+              <ArrowCard entry={project} lang={lang} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="animate space-y-4">
+        <h5 class="font-semibold text-black dark:text-white">
+          {t('home.connect')}
+        </h5>
+        <article>
+          <p>
+            {t('home.connect-text')}
+          </p>
+        </article>
+        <ul class="flex flex-wrap gap-2">
+          {SOCIALS.map(SOCIAL => (
+            <li class="flex gap-x-2 text-nowrap">
+              <Link href={SOCIAL.HREF} external aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}>
+                {SOCIAL.NAME}
+              </Link>
+              {"/"}
+            </li>
+          ))}
+          <li class="line-clamp-1">
+            <Link href={`mailto:${SITE.EMAIL}`} aria-label={`Email ${SITE.NAME}`}>
+              {SITE.EMAIL}
+            </Link>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </Container>
+</PageLayout>

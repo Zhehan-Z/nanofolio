@@ -1,0 +1,20 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/config';
+
+interface Props {
+  contentLang: string;
+}
+
+const { contentLang } = Astro.props;
+const currentLang = getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang);
+
+const shouldShow = contentLang !== currentLang;
+const key = contentLang === 'en' ? 'content.only.en' : 'content.only.zh';
+---
+
+{shouldShow && (
+  <div class="relative group w-fit flex px-3 py-1.5 flex-nowrap rounded border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-black/40 dark:text-white/40 text-sm md:ml-2">
+    {t(key)}
+  </div>
+)}

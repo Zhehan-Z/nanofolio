@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import ArrowCard from "@components/ArrowCard.astro";
+import BackToPrev from "@components/BackToPrev.astro";
+import { PROJECTS } from "@consts";
+import { languages, getLangFromUrl, useTranslations } from '../../../i18n/config';
+
+export async function getStaticPaths() {
+  return Object.keys(languages).map(lang => ({ params: { lang } }));
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Get all projects in current language, fallback to any language if needed
+const allProjects = await getCollection("projects");
+const slugs = new Set(allProjects.map(project => project.slug.split('/').pop()));
+
+const projects = Array.from(slugs).map(slug => {
+  // Try to find project in current language
+  const langProject = allProjects.find(p => 
+    p.slug.split('/').pop() === slug && 
+    p.data.lang === lang &&
+    !p.data.draft
+  );
+  
+  // Fallback to any language version
+  return langProject || allProjects.find(p => 
+    p.slug.split('/').pop() === slug && 
+    !p.data.draft
+  );
+}).filter(Boolean).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
+  <Container>
+    <div class="animate mb-10">
+      <BackToPrev href={`/${lang}`}>
+        {`${t('card.back')}${t('nav.home').toLowerCase()}`}
+      </BackToPrev>
+    </div>
+    <div class="space-y-6">
+      <div class="animate font-semibold text-black dark:text-white">
+        {t('projects.title')}
+      </div>
+      <ul class="animate flex flex-col gap-4">
+        {
+          projects.map((project) => (
+            <li>
+              <ArrowCard entry={project} lang={lang}/>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Container>
+</PageLayout>

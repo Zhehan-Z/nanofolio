@@ -1,0 +1,103 @@
+---
+import { getLangFromUrl, useTranslations, useRouteTranslations } from '../i18n/config';
+import Link from "./Link.astro";
+import LanguageSelector from "./LanguageSelector.astro";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRouteTranslations(lang);
+
+const basePath = lang === 'en' ? '' : `/${lang}`;
+---
+
+<div class="md:hidden">
+  <button
+    id="mobile-menu-button"
+    class="flex items-center justify-center p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300"
+    aria-label="Toggle menu"
+  >
+    <svg
+      class="w-6 h-6 menu-icon"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M4 6h16M4 12h16M4 18h16"
+      />
+    </svg>
+    <svg
+      class="w-6 h-6 close-icon hidden"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  </button>
+
+  <div
+    id="mobile-menu"
+    class="fixed inset-0 z-50 bg-stone-100/95 dark:bg-stone-900/95 backdrop-blur-sm translate-x-full transition-transform duration-300"
+  >
+    <div class="flex flex-col h-full p-6 pt-24">
+      <nav class="flex flex-col gap-6">
+        <Link href={`${basePath}/${r('blog')}`}>
+          {t('nav.blog')}
+        </Link>
+        <Link href={`${basePath}/${r('academic')}`}>
+          {t('nav.academic')}
+        </Link>
+        <Link href={`${basePath}/${r('projects')}`}>
+          {t('nav.projects')}
+        </Link>
+        <div class="mt-4">
+          <LanguageSelector currentLang={lang} />
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initMobileMenu() {
+    const button = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = button?.querySelector('.menu-icon');
+    const closeIcon = button?.querySelector('.close-icon');
+
+    let isOpen = false;
+
+    function toggleMenu() {
+      isOpen = !isOpen;
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+      menu?.classList.toggle('translate-x-0');
+      menu?.classList.toggle('translate-x-full');
+      menuIcon?.classList.toggle('hidden');
+      closeIcon?.classList.toggle('hidden');
+    }
+
+    button?.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking on a link
+    menu?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (isOpen) toggleMenu();
+      });
+    });
+  }
+
+  // Initialize on page load
+  initMobileMenu();
+
+  // Re-initialize on client-side navigation
+  document.addEventListener('astro:after-swap', initMobileMenu);
+</script>
