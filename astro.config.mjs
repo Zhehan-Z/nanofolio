@@ -4,6 +4,6 @@ import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  site: "https://nanofolio-demo.vercel.app",
+  site: "https://nanofolio.netlify.app",
   integrations: [mdx(), sitemap(), tailwind()],
 });
