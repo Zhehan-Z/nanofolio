@@ -22,32 +22,10 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
 <html lang={lang}>
   <head>
     <Head title={`${localizedTitle} • ${SITE.NAME}`} description={description} />
-    <script is:inline>
-      // Inline script to handle routing before any content loads
-      (function() {
-        const path = window.location.pathname;
-        // Skip for static assets and API routes
-        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) || 
-            path.startsWith('/api/') ||
-            path.startsWith('/fonts/')) {
-          return;
-        }
-
-        // Check if path starts with a valid language prefix
-        const langMatch = path.match(/^\/(?:en|zh-CN)(?:\/|$)/);
-        if (!langMatch) {
-          const storedLang = localStorage.getItem('preferredLanguage');
-          const browserLang = navigator.language;
-          const lang = storedLang || 
-            (browserLang.startsWith('zh') ? 'zh-CN' : 
-             browserLang.split('-')[0] === 'en' ? 'en' : 'en');
-          
-          // Remove any existing language prefix and add the correct one
-          const cleanPath = path.replace(/^\/(?:en|zh-CN)/, '');
-          const newPath = `/${lang}${cleanPath}`;
-          window.location.replace(newPath.replace(/\/+/g, '/'));
-        }
-      })();
+    <script>
+      import { handleInitialRouting } from '../lib/routing';
+      // Handle routing before any content loads
+      handleInitialRouting();
     </script>
   </head>
   <body>
