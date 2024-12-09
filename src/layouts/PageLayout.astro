@@ -34,28 +34,27 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
           return;
         }
 
-        // Check if path starts with a valid language prefix (case insensitive)
-        const hasValidPrefix = /^\/(?:en|zh-cn)(?:\/|$)/i.test(path);
-        if (!hasValidPrefix) {
-          const storedLang = localStorage.getItem('preferredLanguage');
-          const browserLang = navigator.language;
-          const lang = storedLang || 
-            (browserLang.toLowerCase().startsWith('zh') ? 'zh-CN' : 
-             browserLang.toLowerCase().startsWith('en') ? 'en' : 'en');
-          
-          // Remove any existing language prefix and add the correct one
-          const pathWithoutLang = path.replace(/^\/(?:en|zh-cn|zh-CN)(?:\/|$)/i, '/');
-          const newPath = `/${lang}${pathWithoutLang}`;
+        // Extract and normalize the language code
+        const [, lang = ''] = path.split('/');
+        const langLower = lang.toLowerCase();
+        
+        // Define valid languages and their canonical forms
+        const validLangs = { 'en': 'en', 'zh-cn': 'zh-CN' };
+        
+        // Check if we need to redirect
+        if (!lang || !(langLower in validLangs)) {
+          // No language or invalid language - redirect to preferred language
+          const preferred = localStorage.getItem('preferredLanguage') || 
+            (navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en');
+          const newPath = '/' + preferred + path.replace(/^\/[^/]*/, '');
           window.location.replace(newPath.replace(/\/+/g, '/'));
-        } else {
-          // Normalize the case of the language prefix if needed
-          const [, prefix, ...rest] = path.split('/');
-          const normalizedPrefix = prefix.toLowerCase() === 'zh-cn' ? 'zh-CN' : 
-                                 prefix.toLowerCase() === 'en' ? 'en' : prefix;
-          if (normalizedPrefix !== prefix) {
-            const newPath = `/${normalizedPrefix}/${rest.join('/')}`;
-            window.location.replace(newPath.replace(/\/+/g, '/'));
-          }
+        } else if (validLangs[langLower] !== lang) {
+          // Valid language but wrong case - normalize it
+          const newPath = path.replace(
+            new RegExp(`^/${lang}`), 
+            '/' + validLangs[langLower]
+          );
+          window.location.replace(newPath.replace(/\/+/g, '/'));
         }
       })();
     </script>
