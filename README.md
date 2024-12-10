@@ -14,7 +14,7 @@ NanoFolio inherits all of Astro Nano's strengths. It's still lightweight and loa
 
 As many customizations are written directly in the code and not modifiable, the ZhehanZ NanoFolio is not yet ready for distribution.
 
-**Please refrain from deploying this template in a production environment.**
+**Please refrain from deploying this template in a production environment.** A production-ready version will be available in the near future.
 
 ## Development
 
