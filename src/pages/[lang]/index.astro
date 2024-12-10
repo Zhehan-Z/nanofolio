@@ -175,7 +175,7 @@ const projects = (await getCollection("projects"))
           </p>
         </article>
         <div class="flex flex-col gap-6">
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 text-sm">
             {SOCIALS.map((SOCIAL, index) => (
               <>
                 <Link 
@@ -191,7 +191,7 @@ const projects = (await getCollection("projects"))
               </>
             ))}
           </div>
-          <div class="space-y-2">
+          <div class="space-y-2 text-sm">
             {SITE.EMAILS.map((email) => (
               <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <Link 
