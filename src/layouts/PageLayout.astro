@@ -23,26 +23,25 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
   <head>
     <Head title={`${localizedTitle} • ${SITE.NAME}`} description={description} />
     <script is:inline>
-      // Inline script to handle routing before any content loads
       (function() {
         const path = window.location.pathname;
         
         // Skip for static assets and API routes
-        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) || 
+        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) ||
             path.startsWith('/api/') ||
             path.startsWith('/fonts/')) {
           return;
         }
 
-        // Extract the language prefix if it exists
-        const [, prefix = ''] = path.match(/^\/([^/]+)/) || [];
+        const match = path.match(/^\/([^/]+)/);
+        const prefix = match && match[1] ? match[1] : '';
         const prefixLower = prefix.toLowerCase();
 
-        // Only redirect if there's no valid language prefix
+        // If there's no valid language prefix, add one based on user preference
         if (prefixLower !== 'en' && prefixLower !== 'zh-cn') {
           const storedLang = localStorage.getItem('preferredLanguage');
           const browserLang = navigator.language.toLowerCase();
-          const lang = storedLang || 
+          const lang = storedLang ||
             (browserLang.startsWith('zh') ? 'zh-CN' : 
              browserLang.startsWith('en') ? 'en' : 'en');
           
@@ -50,12 +49,7 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
           const newPath = `/${lang}/${cleanPath}`.replace(/\/+/g, '/');
           window.location.replace(newPath);
         }
-        // Handle case normalization for zh-cn -> zh-CN
-        else if (prefixLower === 'zh-cn' && prefix !== 'zh-CN') {
-          const rest = path.slice(prefix.length + 1);
-          const newPath = `/zh-CN/${rest}`.replace(/\/+/g, '/');
-          window.location.replace(newPath);
-        }
+        // Do not handle zh-cn -> zh-CN normalization here; let routing.ts handle it
       })();
     </script>
   </head>
@@ -69,13 +63,11 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
       import { restoreScrollPosition } from '../lib/scroll';
       
       function init() {
-        // Handle scroll restoration
         requestAnimationFrame(() => {
           restoreScrollPosition();
         });
       }
       
-      // Initialize on page load and after view transitions
       window.addEventListener('load', init);
       document.addEventListener('astro:page-load', init);
     </script>
