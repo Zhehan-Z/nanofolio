@@ -4,7 +4,7 @@ description: "初步了解神经科学基础和前沿研究并上手实验"
 projectType: "research"
 course: "初探脑科学"
 instructor: "薛磊博士"
-dateStart: "2024-07-11"
+dateStart: "2023-07-11"
 dateEnd: "2023-07-15"
 role: "见习学生"
 technologies: ["生物", "脑科学", "学术研究"]

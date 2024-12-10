@@ -4,8 +4,8 @@ description: "Introduction to Neuroscience Fundamentals and Frontiers with Hands
 projectType: "research"
 course: "Introduction to Neuroscience"
 instructor: "Dr. Xue Lei"
-dateStart: "2024-07-11"
-dateEnd: "2024-07-15"
+dateStart: "2023-07-11"
+dateEnd: "2023-07-15"
 role: "Internship Student"
 technologies: ["Biology", "Neuroscience", "Academic Research"]
 links: [
