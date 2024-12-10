@@ -19,25 +19,21 @@ export function getPathSegments(pathname: string): { firstSegment: string; remai
 
 export function detectPreferredLanguage(): string {
   try {
-    // Check localStorage first
     const storedLang = localStorage.getItem('preferredLanguage');
     if (storedLang && languages[normalizeLanguage(storedLang)]) {
       return normalizeLanguage(storedLang);
     }
 
-    // Check browser language
     const browserLang = navigator.language;
     const normalized = normalizeLanguage(browserLang);
     if (languages[normalized]) {
       return normalized;
     }
 
-    // Handle Chinese variants
     if (browserLang.toLowerCase().startsWith('zh')) {
       return 'zh-CN';
     }
 
-    // Handle English variants
     if (browserLang.toLowerCase().startsWith('en')) {
       return 'en';
     }
@@ -66,32 +62,25 @@ export function getPathWithoutLang(path: string): string {
 }
 
 export function getLanguagePrefixedPath(path: string, lang?: string): string {
-  // Return as-is for public paths
   if (isPublicPath(path)) {
     return path;
   }
 
-  // Remove any existing language prefix
   const pathWithoutLang = getPathWithoutLang(path);
   
-  // Use provided lang or detect preferred language
   let targetLang = lang || detectPreferredLanguage();
   targetLang = normalizeLanguageCode(targetLang);
   
-  // Construct the new path, ensuring no double slashes
   return `/${targetLang}${pathWithoutLang}`.replace(/\/+/g, '/');
 }
 
-// Function to handle initial routing
 export function handleInitialRouting(): void {
   const path = window.location.pathname;
   
-  // Skip for public paths
   if (isPublicPath(path)) {
     return;
   }
 
-  // If path has a valid language prefix but wrong case, normalize it
   if (hasValidLanguagePrefix(path)) {
     const [, lang, ...rest] = path.split('/');
     const normalizedLang = normalizeLanguageCode(lang);
@@ -102,7 +91,6 @@ export function handleInitialRouting(): void {
     return;
   }
 
-  // If path doesn't have a valid language prefix, add one
   const newPath = getLanguagePrefixedPath(path);
   if (newPath !== path) {
     window.location.replace(newPath);

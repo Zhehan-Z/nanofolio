@@ -23,40 +23,33 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
   <head>
     <Head title={`${localizedTitle} • ${SITE.NAME}`} description={description} />
     <script is:inline>
-      // Inline script to handle routing before any content loads
       (function() {
         const path = window.location.pathname;
         
         // Skip for static assets and API routes
-        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) || 
+        if (path.match(/\.(ico|png|jpg|jpeg|svg|css|js|json|txt|xml)$/) ||
             path.startsWith('/api/') ||
             path.startsWith('/fonts/')) {
           return;
         }
 
-        // Check if path starts with a valid language prefix (case insensitive)
-        const hasValidPrefix = /^\/(?:en|zh-cn)(?:\/|$)/i.test(path);
-        if (!hasValidPrefix) {
+        const match = path.match(/^\/([^/]+)/);
+        const prefix = match && match[1] ? match[1] : '';
+        const prefixLower = prefix.toLowerCase();
+
+        // If there's no valid language prefix, add one based on user preference
+        if (prefixLower !== 'en' && prefixLower !== 'zh-cn') {
           const storedLang = localStorage.getItem('preferredLanguage');
-          const browserLang = navigator.language;
-          const lang = storedLang || 
-            (browserLang.toLowerCase().startsWith('zh') ? 'zh-CN' : 
-             browserLang.toLowerCase().startsWith('en') ? 'en' : 'en');
+          const browserLang = navigator.language.toLowerCase();
+          const lang = storedLang ||
+            (browserLang.startsWith('zh') ? 'zh-CN' : 
+             browserLang.startsWith('en') ? 'en' : 'en');
           
-          // Remove any existing language prefix and add the correct one
-          const pathWithoutLang = path.replace(/^\/(?:en|zh-cn|zh-CN)(?:\/|$)/i, '/');
-          const newPath = `/${lang}${pathWithoutLang}`;
-          window.location.replace(newPath.replace(/\/+/g, '/'));
-        } else {
-          // Normalize the case of the language prefix if needed
-          const [, prefix, ...rest] = path.split('/');
-          const normalizedPrefix = prefix.toLowerCase() === 'zh-cn' ? 'zh-CN' : 
-                                 prefix.toLowerCase() === 'en' ? 'en' : prefix;
-          if (normalizedPrefix !== prefix) {
-            const newPath = `/${normalizedPrefix}/${rest.join('/')}`;
-            window.location.replace(newPath.replace(/\/+/g, '/'));
-          }
+          const cleanPath = path.replace(/^\/+/, '');
+          const newPath = `/${lang}/${cleanPath}`.replace(/\/+/g, '/');
+          window.location.replace(newPath);
         }
+        // Do not handle zh-cn -> zh-CN normalization here; let routing.ts handle it
       })();
     </script>
   </head>
@@ -70,13 +63,11 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
       import { restoreScrollPosition } from '../lib/scroll';
       
       function init() {
-        // Handle scroll restoration
         requestAnimationFrame(() => {
           restoreScrollPosition();
         });
       }
       
-      // Initialize on page load and after view transitions
       window.addEventListener('load', init);
       document.addEventListener('astro:page-load', init);
     </script>
