@@ -34,27 +34,27 @@ const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
           return;
         }
 
-        // Extract and normalize the language code
-        const [, lang = ''] = path.split('/');
-        const langLower = lang.toLowerCase();
-        
-        // Define valid languages and their canonical forms
-        const validLangs = { 'en': 'en', 'zh-cn': 'zh-CN' };
-        
-        // Check if we need to redirect
-        if (!lang || !(langLower in validLangs)) {
-          // No language or invalid language - redirect to preferred language
-          const preferred = localStorage.getItem('preferredLanguage') || 
-            (navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en');
-          const newPath = '/' + preferred + path.replace(/^\/[^/]*/, '');
-          window.location.replace(newPath.replace(/\/+/g, '/'));
-        } else if (validLangs[langLower] !== lang) {
-          // Valid language but wrong case - normalize it
-          const newPath = path.replace(
-            new RegExp(`^/${lang}`), 
-            '/' + validLangs[langLower]
-          );
-          window.location.replace(newPath.replace(/\/+/g, '/'));
+        // Extract the language prefix if it exists
+        const [, prefix = ''] = path.match(/^\/([^/]+)/) || [];
+        const prefixLower = prefix.toLowerCase();
+
+        // Only redirect if there's no valid language prefix
+        if (prefixLower !== 'en' && prefixLower !== 'zh-cn') {
+          const storedLang = localStorage.getItem('preferredLanguage');
+          const browserLang = navigator.language.toLowerCase();
+          const lang = storedLang || 
+            (browserLang.startsWith('zh') ? 'zh-CN' : 
+             browserLang.startsWith('en') ? 'en' : 'en');
+          
+          const cleanPath = path.replace(/^\/+/, '');
+          const newPath = `/${lang}/${cleanPath}`.replace(/\/+/g, '/');
+          window.location.replace(newPath);
+        }
+        // Handle case normalization for zh-cn -> zh-CN
+        else if (prefixLower === 'zh-cn' && prefix !== 'zh-CN') {
+          const rest = path.slice(prefix.length + 1);
+          const newPath = `/zh-CN/${rest}`.replace(/\/+/g, '/');
+          window.location.replace(newPath);
         }
       })();
     </script>
