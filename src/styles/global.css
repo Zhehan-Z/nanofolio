@@ -39,6 +39,10 @@ header.expanded {
   @apply border-black/[0.06] dark:border-white/[0.06];
 }
 
+#mobile-menu {
+  @apply z-45;
+}
+
 main {
   @apply flex-1 py-24;
   @apply transition-all duration-300 ease-out;

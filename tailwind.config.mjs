@@ -12,6 +12,10 @@ export default {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         serif: ["Lora", ...defaultTheme.fontFamily.serif],
       },
+      zIndex: {
+        45: '45',
+        50: '50'
+      }
     },
   },
   plugins: [require("@tailwindcss/typography")],
