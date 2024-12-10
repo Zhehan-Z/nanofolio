@@ -30,9 +30,9 @@ const photos = [
 
 // Get all posts, handle language versions
 const allPosts = await getCollection("blog");
-const slugs = new Set(allPosts.map(post => post.slug.split('/').pop()));
+const postSlugs = new Set(allPosts.map(post => post.slug.split('/').pop()));
 
-const blog = Array.from(slugs).map(slug => {
+const blog = Array.from(postSlugs).map(slug => {
   // Try to find post in current language
   const langPost = allPosts.find(p => 
     p.slug.split('/').pop() === slug && 
@@ -63,10 +63,26 @@ const academic = await Promise.all(
   })
 );
 
-const projects = (await getCollection("projects"))
-  .filter(project => !project.data.draft && project.data.lang === lang)
+// Get all projects, handle language versions
+const allProjects = await getCollection("projects");
+const projectSlugs = new Set(allProjects.map(project => project.slug.split('/').pop()));
+
+const projects = Array.from(projectSlugs).map(slug => {
+  // Try to find project in current language
+  const langProject = allProjects.find(p => 
+    p.slug.split('/').pop() === slug && 
+    p.data.lang === lang &&
+    !p.data.draft
+  );
+  
+  // Fallback to any language version
+  return langProject || allProjects.find(p => 
+    p.slug.split('/').pop() === slug && 
+    !p.data.draft
+  );
+}).filter(Boolean)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0,SITE.NUM_PROJECTS_ON_HOMEPAGE);
+  .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 ---
 
 <PageLayout title="home" description={t('meta.home.description')}>

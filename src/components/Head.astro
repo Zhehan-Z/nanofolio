@@ -29,6 +29,9 @@ const { title, description, image = "/nano.png" } = Astro.props;
 <link rel="icon" type="image/x-icon" href="/favicon-light.png">
 <meta name="generator" content={Astro.generator} />
 
+<!-- Preload critical CSS -->
+<link rel="preload" href="/src/styles/global.css" as="style">
+
 <!-- Font preloads -->
 <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin/>
 <link rel="preload" href={inter600} as="font" type="font/woff2" crossorigin/>
