@@ -3,36 +3,36 @@ import type { CollectionEntry } from "astro:content";
 import { dateRange } from "@lib/utils";
 import Link from "@components/Link.astro";
 import BaseCard from "./BaseCard.astro";
-import { AcademicProjectType } from "../consts";
+import { ExperienceProjectType } from "../consts";
 import { useTranslations } from '../i18n/config';
 import { DURATIONS, EASINGS, DELAYS } from '../lib/animations';
 
 interface Props {
-  entry: CollectionEntry<"academic"> & { Content: any };
+  entry: CollectionEntry<"experience"> & { Content: any };
   defaultOpen?: boolean;
   lang?: string;
 }
 
-const { entry, defaultOpen = false, lang = 'en' } = Astro.props;
+const { entry, defaultOpen = false, lang = 'en' } = Astro.props as Props & { lang?: "en" | "zh-CN" };
 const t = useTranslations(lang);
 
-function getProjectTypeLabel(type: AcademicProjectType) {
+function getProjectTypeLabel(type: ExperienceProjectType) {
   const labels = {
-    [AcademicProjectType.COURSEWORK]: t('academic.type.coursework'),
-    [AcademicProjectType.RESEARCH]: t('academic.type.research'),
-    [AcademicProjectType.INTERNSHIP]: t('academic.type.internship'),
-    [AcademicProjectType.VOLUNTEER]: t('academic.type.volunteer'),
-    [AcademicProjectType.EXTRACURRICULAR]: t('academic.type.extracurricular'),
-    [AcademicProjectType.THESIS]: t('academic.type.thesis'),
-    [AcademicProjectType.INDEPENDENT_STUDY]: t('academic.type.independent_study'),
-    [AcademicProjectType.TEACHING]: t('academic.type.teaching'),
-    [AcademicProjectType.WORKSHOP]: t('academic.type.workshop'),
-    [AcademicProjectType.COMPETITION]: t('academic.type.competition'),
-    [AcademicProjectType.PUBLICATION]: t('academic.type.publication'),
-    [AcademicProjectType.PRESENTATION]: t('academic.type.presentation'),
-    [AcademicProjectType.LAB_WORK]: t('academic.type.lab_work'),
-    [AcademicProjectType.STUDY_ABROAD]: t('academic.type.study_abroad'),
-    [AcademicProjectType.CERTIFICATION]: t('academic.type.certification')
+    [ExperienceProjectType.COURSEWORK]: t('experience.type.coursework'),
+    [ExperienceProjectType.RESEARCH]: t('experience.type.research'),
+    [ExperienceProjectType.INTERNSHIP]: t('experience.type.internship'),
+    [ExperienceProjectType.VOLUNTEER]: t('experience.type.volunteer'),
+    [ExperienceProjectType.EXTRACURRICULAR]: t('experience.type.extracurricular'),
+    [ExperienceProjectType.THESIS]: t('experience.type.thesis'),
+    [ExperienceProjectType.INDEPENDENT_STUDY]: t('experience.type.independent_study'),
+    [ExperienceProjectType.TEACHING]: t('experience.type.teaching'),
+    [ExperienceProjectType.WORKSHOP]: t('experience.type.workshop'),
+    [ExperienceProjectType.COMPETITION]: t('experience.type.competition'),
+    [ExperienceProjectType.PUBLICATION]: t('experience.type.publication'),
+    [ExperienceProjectType.PRESENTATION]: t('experience.type.presentation'),
+    [ExperienceProjectType.LAB_WORK]: t('experience.type.lab_work'),
+    [ExperienceProjectType.STUDY_ABROAD]: t('experience.type.study_abroad'),
+    [ExperienceProjectType.CERTIFICATION]: t('experience.type.certification')
   };
   return labels[type] || type;
 }
@@ -176,9 +176,10 @@ function getProjectTypeLabel(type: AcademicProjectType) {
 
       // Handle keyboard events for accessibility
       card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggleExpand(e);
+        const event = e as KeyboardEvent;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleExpand(event);
         }
       });
     });

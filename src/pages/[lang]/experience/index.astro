@@ -1,9 +1,9 @@
 ---
 import { getCollection } from "astro:content";
-import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container.astro";
-import AcademicCard from "@components/AcademicCard.astro";
-import BackToPrev from "@components/BackToPrev.astro";
+import PageLayout from "../../../layouts/PageLayout.astro";
+import Container from "../../../components/Container.astro";
+import ExperienceCard from "../../../components/ExperienceCard.astro";
+import BackToPrev from "../../../components/BackToPrev.astro";
 import { languages, getLangFromUrl, useTranslations } from '../../../i18n/config';
 
 export async function getStaticPaths() {
@@ -13,13 +13,13 @@ export async function getStaticPaths() {
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const collection = (await getCollection("academic", ({ id }) => {
+const collection = (await getCollection("experience", ({ id }) => {
   const [folder] = id.split('/');
   return folder === lang;
 }))
   .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf());
 
-const academic = await Promise.all(
+const experience = await Promise.all(
   collection.map(async (item) => {
     const { Content } = await item.render();
     return { ...item, Content };
@@ -27,7 +27,7 @@ const academic = await Promise.all(
 );
 ---
 
-<PageLayout title="academic" description={t('meta.academic.description')}>
+<PageLayout title="Experience" description={t('meta.experience.description')}>
   <Container>
     <div class="animate mb-10">
       <BackToPrev href={`/${lang}`}>
@@ -36,12 +36,12 @@ const academic = await Promise.all(
     </div>
     <div class="space-y-6">
       <div class="animate font-semibold text-black dark:text-white">
-        {t('academic.title')}
+        {t('experience.title')}
       </div>
       <ul class="flex flex-col space-y-4">
-        {academic.map((entry, index) => (
+        {experience.map((entry, index) => (
           <li class="animate" data-entry-index={index}>
-            <AcademicCard entry={entry} lang={lang} />
+            <ExperienceCard entry={entry} lang={lang} />
           </li>
         ))}
       </ul>

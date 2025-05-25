@@ -38,7 +38,7 @@ export function restoreScrollPosition() {
   }
 }
 
-// Save entry index for academic section
+// Save entry index for Experience section
 export function saveEntryIndex(index: number) {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem('scrollToEntry', index.toString());

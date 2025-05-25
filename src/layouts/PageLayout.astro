@@ -15,7 +15,8 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 // Get localized site title
-const localizedTitle = t(`meta.${title.toLowerCase()}`) || title;
+const metaKey = `meta.${title.toLowerCase()}` as const;
+const localizedTitle = t(metaKey as any) || title;
 ---
 
 <!doctype html>
