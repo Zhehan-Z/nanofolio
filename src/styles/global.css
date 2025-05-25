@@ -5,6 +5,7 @@
 html {
   overflow-y: scroll;
   color-scheme: light;
+  transition: none !important;
 }
 
 html.dark {
@@ -104,4 +105,12 @@ img[src*="logo-light"] {
 /* Photo carousel styles */
 .carousel-item {
   @apply will-change-[opacity];
+}
+
+/* Reset default link before CSS loads */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
