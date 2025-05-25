@@ -20,7 +20,7 @@ export const experience = {
     'experience.type.certification': 'Certification',
   },
   'zh-CN': {
-    'experience.title': '经历',
+    'experience.title': '个人经历',
     'experience.more.title': '更多经历',
     'experience.more.description': '探索更多兴趣与经历',
     'experience.type.coursework': '课程作业',
