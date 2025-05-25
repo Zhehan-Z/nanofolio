@@ -5,6 +5,7 @@
 html {
   overflow-y: scroll;
   color-scheme: light;
+  transition: none !important;
 }
 
 html.dark {
@@ -13,7 +14,9 @@ html.dark {
 
 html,
 body {
-  @apply size-full;
+  @apply size-full overflow-x-hidden;
+  max-width: 100vw;
+  position: relative;
 }
 
 body {
@@ -104,4 +107,26 @@ img[src*="logo-light"] {
 /* Photo carousel styles */
 .carousel-item {
   @apply will-change-[opacity];
+}
+
+/* Reset default link before CSS loads */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* 防止页面横向滚动 */
+html, body {
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* 确保内容不会超出视口宽度 */
+#app-container {
+  width: 100%;
+  overflow-x: clip;
 }

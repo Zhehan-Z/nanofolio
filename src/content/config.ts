@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { AcademicProjectType } from "../consts";
+import { ExperienceProjectType } from "../consts";
 
 const languages = ["en", "zh-CN"] as const;
 
@@ -14,12 +14,12 @@ const blog = defineCollection({
   }),
 });
 
-const academic = defineCollection({
+const experience = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    projectType: z.nativeEnum(AcademicProjectType),
+    projectType: z.nativeEnum(ExperienceProjectType),
     course: z.string().optional(),
     instructor: z.string().optional(),
     dateStart: z.coerce.date(),
@@ -50,4 +50,4 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { blog, academic, projects };
+export const collections = { blog, experience, projects };

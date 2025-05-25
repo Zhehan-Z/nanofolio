@@ -1,12 +1,12 @@
 export const routeTranslations = {
   en: {
     'blog': 'blog',
-    'academic': 'academic',
+    'experience': 'experience',
     'projects': 'projects'
   },
   'zh-CN': {
     'blog': 'blog',
-    'academic': 'academic',
+    'experience': 'experience',
     'projects': 'projects'
   }
 } as const;

@@ -46,14 +46,20 @@ const r = useRouteTranslations(lang);
           <span>
             {`/`}
           </span>
-          <Link href={`/${lang}/${r('academic')}`}>
-            {t('nav.academic')}
+          <Link href={`/${lang}/${r('experience')}`}>
+            {t('nav.experience')}
           </Link>
           <span>
             {`/`}
           </span>
           <Link href={`/${lang}/${r('projects')}`}>
             {t('nav.projects')}
+          </Link>
+          <span>
+            {`/`}
+          </span>
+          <Link href="https://photos.zhehanz.com">
+            {t('nav.photos')}
           </Link>
         </div>
         <LanguageSelector currentLang={lang} />
@@ -66,8 +72,8 @@ const r = useRouteTranslations(lang);
           <Link href={`/${lang}/${r('blog')}`}>
             {t('nav.blog')}
           </Link>
-          <Link href={`/${lang}/${r('academic')}`}>
-            {t('nav.academic')}
+          <Link href={`/${lang}/${r('experience')}`}>
+            {t('nav.experience')}
           </Link>
           <Link href={`/${lang}/${r('projects')}`}>
             {t('nav.projects')}

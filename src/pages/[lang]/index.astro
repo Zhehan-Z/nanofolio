@@ -3,11 +3,11 @@ import { getCollection } from "astro:content";
 import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard.astro";
-import AcademicCard from "@components/AcademicCard.astro";
+import ExperienceCard from "@components/ExperienceCard.astro";
 import Link from "@components/Link.astro";
 import PhotoGrid from "@components/PhotoGrid.astro";
 import { SITE, SOCIALS } from "@consts";
-import { getLangFromUrl, useTranslations, languages } from '../../i18n/config';
+import { getLangFromUrl, useTranslations, languages } from "@i18n/config";
 
 export async function getStaticPaths() {
   return Object.keys(languages).map(lang => ({ params: { lang } }));
@@ -15,6 +15,13 @@ export async function getStaticPaths() {
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+
+const emailLabels = {
+  work: 'home.email.work',
+  personal: 'home.email.personal',
+  academic: 'home.email.academic',
+  other: 'home.email.other'
+} as const;
 
 const photos = [
   { src: "/photos/home/photo-1.jpeg", alt: "Photo 1" },
@@ -46,18 +53,21 @@ const blog = Array.from(postSlugs).map(slug => {
     !p.data.draft
   );
 }).filter(Boolean)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a, b) => {
+    if (!a || !b) return 0;
+    return b.data.date.valueOf() - a.data.date.valueOf();
+  })
   .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
 
-const allAcademic = (await getCollection("academic", ({ id }) => {
+const allExperience = (await getCollection("experience", ({ id }) => {
   const [folder] = id.split('/');
   return folder === lang;
 }))
   .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf())
-  .slice(0,SITE.NUM_ACADEMIC_ON_HOMEPAGE);
+  .slice(0, SITE.NUM_EXPERIENCE_ON_HOMEPAGE);
 
-const academic = await Promise.all(
-  allAcademic.map(async (item) => {
+const experience = await Promise.all(
+  allExperience.map(async (item) => {
     const { Content } = await item.render();
     return { ...item, Content };
   })
@@ -81,7 +91,10 @@ const projects = Array.from(projectSlugs).map(slug => {
     !p.data.draft
   );
 }).filter(Boolean)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a, b) => {
+    if (!a || !b) return 0;
+    return b.data.date.valueOf() - a.data.date.valueOf();
+  })
   .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 ---
 
@@ -121,7 +134,7 @@ const projects = Array.from(projectSlugs).map(slug => {
 
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
+          <h5 class="text-lg font-semibold text-black dark:text-white">
             {t('home.latest-posts')}
           </h5>
           <Link href={`/${lang}/blog`}>
@@ -139,24 +152,24 @@ const projects = Array.from(projectSlugs).map(slug => {
 
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            {t('home.academic-projects')}
+          <h5 class="text-lg font-semibold text-black dark:text-white">
+            {t('home.experience-projects')}
           </h5>
-          <Link href={`/${lang}/academic`}>
-            {t('see.all')} {t('nav.academic').toLowerCase()}
+          <Link href={`/${lang}/experience`}>
+            {t('see.all')} {t('nav.experience').toLowerCase()}
           </Link>
         </div>
         <ul class="flex flex-col space-y-4">
-          {academic.map(entry => (
+          {experience.map(entry => (
             <li>
-              <AcademicCard entry={entry} lang={lang} />
+              <ExperienceCard entry={entry} lang={lang} />
             </li>
           ))}
           <li>
             <ArrowCard 
-              href={`/${lang}/academic`}
-              title={t('academic.more.title')}
-              description={t('academic.more.description')}
+              href={`/${lang}/experience`}
+              title={t('experience.more.title')}
+              description={t('experience.more.description')}
               scrollToIndex={2}
             />
           </li>
@@ -165,7 +178,7 @@ const projects = Array.from(projectSlugs).map(slug => {
 
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
+          <h5 class="text-lg font-semibold text-black dark:text-white">
             {t('home.recent-projects')}
           </h5>
           <Link href={`/${lang}/projects`}>
@@ -182,7 +195,7 @@ const projects = Array.from(projectSlugs).map(slug => {
       </section>
 
       <section class="animate space-y-4">
-        <h5 class="font-semibold text-black dark:text-white">
+        <h5 class="text-lg font-semibold text-black dark:text-white">
           {t('home.connect')}
         </h5>
         <article>
@@ -209,27 +222,23 @@ const projects = Array.from(projectSlugs).map(slug => {
           </div>
           <div class="space-y-2 text-sm">
             {SITE.EMAILS.map((email) => (
-              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <Link 
-                  href={`mailto:${email.address}`} 
-                  aria-label={`Email ${SITE.NAME}${email.label ? ` (${email.label})` : ''}`}
-                  class="break-all"
-                >
-                  {email.address}
-                </Link>
-                <div class="flex gap-1.5 flex-wrap">
-                  {email.label && (
-                    <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
-                      {t(`home.email.${email.label.toLowerCase()}`)}
-                    </span>
-                  )}
-                  {email.primary && (
-                    <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
-                      {t('home.email.primary')}
-                    </span>
-                  )}
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <Link href={`mailto:${email.address}`}>
+                    {email.address}
+                  </Link>
+                  <div class="flex gap-1.5 flex-wrap">
+                    {email.label && (
+                      <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
+                        {t(emailLabels[email.label.toLowerCase() as keyof typeof emailLabels] as any)}
+                      </span>
+                    )}
+                    {email.primary && (
+                      <span class="text-[11px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40">
+                        {t('home.email.primary')}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
         </div>

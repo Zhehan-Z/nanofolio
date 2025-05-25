@@ -2,7 +2,7 @@ export const home = {
   en: {
     'home.greeting': "Hi, I'm Zhehan Zhang",
     'home.latest-posts': 'Latest Posts',
-    'home.academic-projects': 'New Academic Experience',
+    'home.experience-projects': 'New Experiences',
     'home.recent-projects': 'Recent Projects',
     'home.connect': "Let's Connect",
     'home.connect-text': 'Here are my social media links and contact details. If you want to get in touch about opportunities or just to say hi, reach out anytime.',
@@ -17,7 +17,7 @@ export const home = {
   'zh-CN': {
     'home.greeting': '你好，我是张哲涵',
     'home.latest-posts': '最新文章',
-    'home.academic-projects': '近期学术',
+    'home.experience-projects': '近期经历',
     'home.recent-projects': '项目上新',
     'home.connect': '联系交流',
     'home.connect-text': '平生湖海少知音，同行云雾绕衣襟。这里有我的各种社交媒体和联系方式。如果您想就机会或其他事宜与我联系，欢迎随时打个招呼。',

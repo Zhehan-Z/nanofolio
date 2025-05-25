@@ -7,7 +7,7 @@ export type Site = {
   }>;
   NUM_POSTS_ON_HOMEPAGE: number;
   NUM_PROJECTS_ON_HOMEPAGE: number;
-  NUM_ACADEMIC_ON_HOMEPAGE: number;
+  NUM_EXPERIENCE_ON_HOMEPAGE: number;
 };
 
 export type Metadata = {
@@ -20,7 +20,7 @@ export type Socials = {
   HREF: string;
 }[];
 
-export enum AcademicProjectType {
+export enum ExperienceProjectType {
   COURSEWORK = "coursework",
   RESEARCH = "research",
   INTERNSHIP = "internship",
@@ -53,11 +53,15 @@ export const SITE: Site = {
     {
       address: "zhang.zhehan@nfls.partner.onmschina.cn",
       label: "Academic"
-    }
+    },
+    {
+      address: "zezhang@riccischolars.org",
+      label: "Work"
+    },
   ],
   NUM_POSTS_ON_HOMEPAGE: 3,
   NUM_PROJECTS_ON_HOMEPAGE: 3,
-  NUM_ACADEMIC_ON_HOMEPAGE: 2,
+  NUM_EXPERIENCE_ON_HOMEPAGE: 2,
 };
 
 export const HOME: Metadata = {
@@ -70,9 +74,9 @@ export const BLOG: Metadata = {
   DESCRIPTION: "A collection of articles on topics I am passionate about.",
 };
 
-export const ACADEMIC: Metadata = {
-  TITLE: "Academic Experience",
-  DESCRIPTION: "A showcase of my coursework, research, and academic experiences.",
+export const EXPERIENCE: Metadata = {
+  TITLE: "Experience",
+  DESCRIPTION: "A showcase of my coursework, research, and more.",
 };
 
 export const PROJECTS: Metadata = {
