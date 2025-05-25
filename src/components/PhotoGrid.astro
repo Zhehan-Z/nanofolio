@@ -88,7 +88,14 @@ const { images } = Astro.props;
 <script>
   import { initializeCarousel } from '../lib/carousel';
 
+  let carouselIntervals: (number | NodeJS.Timeout)[] = [];
+  let parallaxRafId: number | null = null;
+
   function initPhotoCarousels() {
+    // Clean up existing intervals
+    carouselIntervals.forEach(interval => clearInterval(interval));
+    carouselIntervals = [];
+
     const carousels = document.querySelectorAll('.photo-carousel') as NodeListOf<HTMLElement>;
     carousels.forEach(carousel => {
       const totalPhotos = 9; // Total number of photos
@@ -96,40 +103,57 @@ const { images } = Astro.props;
         interval: 4000,
         transitionDuration: 600
       });
-
-      // Cleanup on page navigation
-      document.addEventListener('astro:before-swap', () => {
-        clearInterval(interval);
-      });
+      carouselIntervals.push(interval);
     });
   }
 
   function initParallaxEffect() {
-  const els = Array.from(document.querySelectorAll('.parallax'));
-  const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+    // Clean up existing animation frame
+    if (parallaxRafId) {
+      cancelAnimationFrame(parallaxRafId);
+    }
 
-  const render = () => {
-    const vh = window.innerHeight;
-    els.forEach(el => {
-      const speed = isMobile() ? +(el.dataset.speedMobile || 1) : +(el.dataset.speedDesktop || 1);
-      const top = el.getBoundingClientRect().top;
-      const translateY = -(top - vh / 2) * speed * 0.05;
-      el.style.transform = `translate3d(0, ${translateY}px, 0)`;
-    });
-    requestAnimationFrame(render);
-  };
+    const els = Array.from(document.querySelectorAll('.parallax')) as HTMLElement[];
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
-  requestAnimationFrame(render);
-}
+    const render = () => {
+      const vh = window.innerHeight;
+      els.forEach(el => {
+        const speed = isMobile() ? +(el.dataset.speedMobile || 1) : +(el.dataset.speedDesktop || 1);
+        const top = el.getBoundingClientRect().top;
+        const translateY = -(top - vh / 2) * speed * 0.05;
+        el.style.transform = `translate3d(0, ${translateY}px, 0)`;
+      });
+      parallaxRafId = requestAnimationFrame(render);
+    };
 
-  // Initialize on DOMContentLoaded or immediately if already loaded
-  const initOnLoad = () => {
+    parallaxRafId = requestAnimationFrame(render);
+  }
+
+  function cleanup() {
+    carouselIntervals.forEach(interval => clearInterval(interval));
+    carouselIntervals = [];
+    if (parallaxRafId) {
+      cancelAnimationFrame(parallaxRafId);
+      parallaxRafId = null;
+    }
+  }
+
+  function initOnLoad() {
     initPhotoCarousels();
     initParallaxEffect();
-  };
+  }
+
+  // Initialize on page load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initOnLoad);
   } else {
     initOnLoad();
   }
+
+  // Re-initialize after navigation/language switch
+  document.addEventListener('astro:after-swap', initOnLoad);
+  
+  // Cleanup before navigation
+  document.addEventListener('astro:before-swap', cleanup);
 </script>
