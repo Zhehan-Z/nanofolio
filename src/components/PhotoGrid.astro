@@ -10,7 +10,7 @@ const { images } = Astro.props;
 
 <div class="relative md:w-[400px] md:h-[300px] shrink-0">
   <!-- Mobile: 横向重叠三个圆 -->
-  <div class="md:hidden relative w-screen h-[50vw] photo-carousel mt-12 mb-16" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); width: 100vw;">
+  <div class="md:hidden relative w-screen h-[50vw] photo-carousel mt-12 mb-16 overflow-x-clip overflow-y-visible overscroll-x-contain" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); width: 100vw;">
     <div class="absolute parallax -left-[5vw] top-0" data-photo-index="0" data-speed-mobile="1.2" data-speed-desktop="2" data-initial-x="0" data-initial-y="0">
       <img src={images[0].src} alt={images[0].alt} class="w-[50vw] h-[50vw] max-w-none rounded-full object-cover border border-black/10 dark:border-white/10 will-change-[transform,opacity] opacity-0" loading="eager" style="transform-origin: center center;" />
     </div>
