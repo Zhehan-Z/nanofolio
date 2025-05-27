@@ -9,8 +9,10 @@ export const defaultLang = 'en';
 export const showDefaultLang = true;
 
 export function getLangFromUrl(url: URL) {
-  const [, lang] = url.pathname.split('/');
-  if (lang && lang in languages) return lang as keyof typeof languages;
+  const pathSegments = url.pathname.split('/').filter(segment => segment !== '');
+  if (pathSegments.length > 0 && pathSegments[0] in languages) {
+    return pathSegments[0] as keyof typeof languages;
+  }
   return defaultLang;
 }
 
